@@ -317,30 +317,30 @@
     const clockFmt = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
 
     const intervals = [
-      { start: "00:00", end: "07:05", color: "#000000", textcolor: "#ffffff", answer: "Go back to sleep.", period: "Before School" },
+      { start: "00:00", end: "07:05", color: "#000000", textcolor: "#ffffff", answer: "Only in designated areas.", period: "Before School" },
       { start: "07:05", end: "07:15", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "07:25", end: "07:51", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "1st Period" },
-      { start: "08:01", end: "08:07", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "08:17", end: "08:43", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "2nd Period"},
-      { start: "08:53", end: "08:59", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "09:09", end: "09:35", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "3rd Period"},
-      { start: "09:45", end: "09:51", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "10:01", end: "10:10", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "Oiler Time" },
-      { start: "10:20", end: "10:26", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "10:36", end: "11:02", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "4th Period" },
-      { start: "11:12", end: "11:18", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "11:28", end: "12:41", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "5th Period" },
-      { start: "12:51", end: "12:57", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "13:07", end: "13:33", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "6th Period" },
-      { start: "13:43", end: "13:49", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
-      { start: "13:59", end: "14:25", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "7th Period" },
-      { start: "14:35", end: "23:59", color: "#000000", textcolor: "#ffffff", answer: "Go home.", period: "After School" },
+      { start: "07:25", end: "08:05", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "1st Period" },
+      { start: "08:15", end: "08:20", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "08:30", end: "09:10", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "2nd Period"},
+      { start: "09:20", end: "09:25", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "09:35", end: "10:15", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "3rd Period"},
+      { start: "10:25", end: "10:30", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      //{ start: "10:01", end: "10:10", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "Oiler Time" },
+      //{ start: "10:20", end: "10:26", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "10:40", end: "11:20", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "4th Period" },
+      { start: "11:30", end: "11:36", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "11:46", end: "12:58", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "5th Period" },
+      { start: "13:08", end: "13:14", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "13:24", end: "13:42", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "6th Period" },
+      { start: "13:52", end: "13:58", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "14:08", end: "14:25", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "7th Period" },
+      { start: "14:35", end: "23:59", color: "#000000", textcolor: "#ffffff", answer: "We love you, but go home!", period: "After School" },
     ];
 
     let bellAudio = null;
     let audioUnlocked = false;
     let lastPlayedTime = "";
-    const bellTimes = ["07:05","07:15","08:01","08:07","08:53","08:59","09:45","09:51","10:20","10:26","11:12","11:18","11:48","12:20","12:51","12:57","13:43","13:49","14:35"];
+    const bellTimes = ["07:05","07:15","08:15","08:20","09:20","09:25","10:25","10:30","11:30","11:36","12:06","12:36","13:08","13:14","13:52","13:58","14:35"];
 
     function enableAudio() {
       bellAudio = new Audio("bells.mp3");
