@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Oiler 10-10 Bell Project - Standard</title>
+  <style>
+    :root{
+      --fg: #000000;
+      --panel-bg: rgba(255,255,255,0.25);
+      --panel-border: rgba(0,0,0,0.15);
+      --shadow: rgba(0,0,0,0.25);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      transition: background-color 0.5s ease;
+      margin: 0;
+      padding: 2rem;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--fg);
+    }
+
+    .panel{
+      width: min(92vw, 980px);
+      padding: clamp(1rem, 3vw, 2rem);
+      border-radius: 24px;
+      border: 1px solid var(--panel-border);
+      background: var(--panel-bg);
+      backdrop-filter: blur(8px);
+      box-shadow:
+        0 10px 30px var(--shadow),
+        inset 0 1px 0 rgba(255,255,255,0.15);
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* ---------- Logo (no box): dynamic halo + centering ---------- */
+    .logo-wrap{ display: block; margin: 0 auto 1rem; position: relative; }
+    .logo{
+      width: clamp(100px, 25%, 180px);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      image-rendering: -webkit-optimize-contrast;
+      filter:
+        drop-shadow(0 1px 1px rgba(0,0,0,0.35))
+        drop-shadow(0 2px 4px rgba(0,0,0,0.30))
+        drop-shadow(0 0 10px rgba(0,0,0,0.25));
+      transition: filter .3s ease;
+    }
+    .light-fg .logo{
+      filter:
+        drop-shadow(0 1px 1px rgba(255,255,255,0.6))
+        drop-shadow(0 2px 4px rgba(255,255,255,0.45))
+        drop-shadow(0 0 10px rgba(255,255,255,0.4));
+    }
+
+    /* ---------- New page title under logo ---------- */
+    .page-title {
+      margin: 0.2em 0 0.4em;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0;
+      animation: fadeIn 1.2s ease forwards;
+    }
+    .light-fg .page-title { text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+
+    /* ---------- Clock + Period ---------- */
+    h1#currentTime{
+      margin: 0 0 .25em 0;
+      font-weight: 800;
+      letter-spacing: .5px;
+      font-size: clamp(2.2rem, 8vw, 6rem);
+      line-height: 1.05;
+    }
+    h2#period{
+      margin: 0 0 0.5em 0; /* tightened */
+      font-weight: 700;
+      font-size: clamp(1.4rem, 4.5vw, 2.6rem);
+      opacity: .95;
+    }
+
+    /* Divider (tightened) */
+    .divider {
+      width: 80%;
+      height: 2px;
+      background: currentColor;
+      opacity: 0.25;
+      margin: 0.4em auto 0.6em;
+      border-radius: 1px;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Prompt + Answer (prompt larger than answer) */
+    .prompt{
+      margin: 0 0 0.6em 0;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: clamp(2rem, 5vw, 3rem);
+      position: relative;
+      display: inline-block;
+    }
+    h2#answer{
+      margin: 0 0 1rem 0;
+      font-weight: 700;
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+    }
+
+    #startButton{
+      margin-top: .75rem;
+      padding: .75rem 1.25rem;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      font-weight: 700;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.4);
+      color: var(--fg);
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: transform .06s ease, box-shadow .15s ease, background .2s ease;
+      box-shadow: 0 6px 16px var(--shadow);
+    }
+    #startButton:hover{ background: rgba(255,255,255,0.55); }
+    #startButton:active{ transform: translateY(1px) scale(0.99); }
+
+    .light-fg .panel{
+      --panel-bg: rgba(0,0,0,0.28);
+      --panel-border: rgba(255,255,255,0.22);
+      --shadow: rgba(0,0,0,0.35);
+    }
+    .light-fg #currentTime,
+    .light-fg #period,
+    .light-fg #answer{
+      text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+    }
+
+    /* ---------- Sync Indicator ---------- */
+    .sync-indicator {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.25);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+      background: #eab308;  /* yellow default */
+      z-index: 9999;
+    }
+    .sync-indicator[state="synced"]  { background: #22c55e; } /* green */
+    .sync-indicator[state="cached"]  { background: #eab308; } /* yellow */
+    .sync-indicator[state="error"]   { background: #ef4444; } /* red */
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0,0,0,0.15); }
+      70%{ transform: scale(1.08); box-shadow: 0 0 0 8px rgba(0,0,0,0); }
+      100%{ transform: scale(1); }
+    }
+    .sync-indicator.syncing { animation: pulse 1.8s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .sync-indicator.syncing { animation: none; } }
+
+    .sync-status {
+      position: fixed;
+      right: 36px;
+      bottom: 10px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(255,255,255,0.35);
+      backdrop-filter: blur(4px);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: #000;
+      border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      white-space: nowrap;
+      transition: opacity 0.3s ease;
+      z-index: 9998;
+    }
+    .sync-status.hidden { opacity: 0; pointer-events: none; }
+    .light-fg .sync-status {
+      background: rgba(0,0,0,0.35);
+      color: #fff;
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    /* ---------- Fade Animations ---------- */
+    @keyframes fadeIn { from { opacity: 0; filter: blur(1px); } to { opacity: 1; filter: blur(0); } }
+    .fade-in { animation: fadeIn 350ms ease; }
+    @media (prefers-reduced-motion: reduce) { .fade-in { animation: none; } }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <span class="logo-wrap">
+      <img src="logo.png" alt="School Logo" class="logo">
+    </span>
+
+    <h3 class="page-title">2025-2026 Standard Bell Schedule</h3>
+
+    <h1 id="currentTime"></h1>
+    <h2 id="period"></h2>
+
+    <div class="divider"></div>
+
+    <p class="prompt">May I use the restroom?</p>
+    <h2 id="answer"></h2>
+    <button id="startButton" onclick="enableAudio()">Enable Bells</button>
+  </div>
+
+  <!-- Sync dot + label (label auto-hides after 15s on 'synced') -->
+  <div id="syncDot" class="sync-indicator" role="status" aria-label="Time sync status"></div>
+  <div id="syncText" class="sync-status">Syncing...</div>
+
+  <script>
+    /*************** Small helper: set text with a subtle fade ***************/
+    function setTextWithFade(el, text) {
+      if (el.textContent === text) return;
+      el.textContent = text;
+      el.classList.remove("fade-in");
+      void el.offsetWidth; // reflow to restart animation
+      el.classList.add("fade-in");
+    }
+
+    /************************* Network Time Sync (Houston) *************************/
+    const TIMEZONE = "America/Chicago";
+    const SYNC_INTERVAL_MS = 10 * 60 * 1000; // resync every 10 minutes
+    const STALE_AFTER_MS   = 30 * 60 * 1000; // show "cached" if no success for 30 min
+    let timeOffsetMs = Number(localStorage.getItem("timeOffsetMs") || 0);
+    let lastSyncAttempt = 0;
+    let lastSyncSuccess = 0;
+
+    const syncDot  = document.getElementById("syncDot");
+    const syncText = document.getElementById("syncText");
+    let hideSyncTextTimer = null;
+
+    function showSyncText() {
+      if (hideSyncTextTimer) { clearTimeout(hideSyncTextTimer); hideSyncTextTimer = null; }
+      syncText.classList.remove("hidden");
+    }
+    function formatOffset(ms){ const sign = ms >= 0 ? "+" : "−"; const abs = Math.abs(ms); return `${sign}${abs.toFixed(0)} ms`; }
+
+    function setSyncState(state, msg) {
+      syncDot.setAttribute("state", state);
+      syncDot.classList.remove("syncing");
+      syncDot.title = msg;
+
+      const text = state === "synced" ? `Synced • ${msg.replace(/^Synced\s*•\s*/i, "")}` : msg;
+      syncText.textContent = text;
+      showSyncText();
+
+      if (state === "synced") {
+        hideSyncTextTimer = setTimeout(() => syncText.classList.add("hidden"), 15000);
+      }
+    }
+    function setSyncing(msg) {
+      showSyncText();
+      syncDot.classList.add("syncing");
+      syncDot.title = msg;
+      syncText.textContent = "Syncing...";
+    }
+    function networkNow() { return new Date(Date.now() + timeOffsetMs); }
+
+    async function syncNetworkTime() {
+      lastSyncAttempt = Date.now();
+      setSyncing("Syncing with network time...");
+      try {
+        const t0 = performance.now();
+        const res = await fetch(`https://worldtimeapi.org/api/timezone/${encodeURIComponent(TIMEZONE)}`, { cache: "no-store" });
+        const t1 = performance.now();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        const serverMs = data.unixtime * 1000;
+        const midpointClientMs = Date.now() + (t1 - t0) / 2;
+        timeOffsetMs = serverMs - midpointClientMs;
+        localStorage.setItem("timeOffsetMs", String(timeOffsetMs));
+        lastSyncSuccess = Date.now();
+
+        setSyncState("synced", `Synced • Offset ${formatOffset(timeOffsetMs)} • ${new Date(lastSyncSuccess).toLocaleTimeString()}`);
+        console.log(`[TimeSync] Offset: ${timeOffsetMs.toFixed(0)} ms`);
+      } catch (err) {
+        console.warn("[TimeSync] Failed; using cached/system time.", err);
+        if (Number.isFinite(timeOffsetMs) && timeOffsetMs !== 0) {
+          setSyncState("cached", `Cached • Offset ${formatOffset(timeOffsetMs)} • Last: ${lastSyncSuccess ? new Date(lastSyncSuccess).toLocaleTimeString() : "n/a"}`);
+        } else {
+          setSyncState("error", "No valid offset (system time only)");
+        }
+      }
+    }
+
+    // Initialize state based on cached offset
+    if (Number.isFinite(timeOffsetMs) && timeOffsetMs !== 0) {
+      setSyncState("cached", `Cached • Offset ${formatOffset(timeOffsetMs)} • Waiting for sync...`);
+    } else {
+      setSyncState("error", "No valid offset (system time only)");
+    }
+    // Kick off sync and periodic checks
+    syncNetworkTime();
+    setInterval(() => {
+      const now = Date.now();
+      if (lastSyncSuccess && now - lastSyncSuccess > STALE_AFTER_MS) {
+        setSyncState("cached", `Cached • Offset ${formatOffset(timeOffsetMs)} • Last: ${new Date(lastSyncSuccess).toLocaleTimeString()}`);
+      }
+      if (now - lastSyncAttempt > SYNC_INTERVAL_MS) syncNetworkTime();
+    }, 60 * 1000);
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) syncNetworkTime(); });
+
+    /************************* Main Bell Logic *************************/
+    function parseTimeToMinutes(timeStr) { const [hour, minute] = timeStr.split(":").map(Number); return hour * 60 + minute; }
+    const clockFmt = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+
+    const intervals = [
+      { start: "00:00", end: "07:05", color: "#000000", textcolor: "#ffffff", answer: "Go back to sleep.", period: "Before School" },
+      { start: "07:05", end: "07:15", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "07:25", end: "07:51", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "1st Period" },
+      { start: "08:01", end: "08:07", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "08:17", end: "08:43", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "2nd Period"},
+      { start: "08:53", end: "08:59", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "09:09", end: "09:35", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "3rd Period"},
+      { start: "09:45", end: "09:51", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "10:01", end: "10:10", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "Oiler Time" },
+      { start: "10:20", end: "10:26", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "10:36", end: "11:02", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "4th Period" },
+      { start: "11:12", end: "11:18", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "11:28", end: "12:41", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "5th Period" },
+      { start: "12:51", end: "12:57", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "13:07", end: "13:33", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "6th Period" },
+      { start: "13:43", end: "13:49", color: "#FDFD96", textcolor: "#000000", answer: "Be back before the bell.", period: "Passing Period"},
+      { start: "13:59", end: "14:25", color: "#80EF80", textcolor: "#000000", answer: "Yes, you may, if the pass is available.", period: "7th Period" },
+      { start: "14:35", end: "23:59", color: "#000000", textcolor: "#ffffff", answer: "Go home.", period: "After School" },
+    ];
+
+    let bellAudio = null;
+    let audioUnlocked = false;
+    let lastPlayedTime = "";
+    const bellTimes = ["07:05","07:15","08:01","08:07","08:53","08:59","09:45","09:51","10:20","10:26","11:12","11:18","11:48","12:20","12:51","12:57","13:43","13:49","14:35"];
+
+    function enableAudio() {
+      bellAudio = new Audio("bells.mp3");
+      bellAudio.load();
+      bellAudio.play().then(() => {
+        bellAudio.pause();
+        bellAudio.currentTime = 0;
+        audioUnlocked = true;
+        document.getElementById('startButton').style.display = 'none';
+        console.log("Audio unlocked!");
+      }).catch(err => console.log("Failed to unlock audio:", err));
+    }
+    function playBellSound() {
+      if (!audioUnlocked || !bellAudio) return;
+      try { bellAudio.currentTime = 0; bellAudio.play(); } catch (e) { console.log("Audio playback failed:", e); }
+    }
+    function checkBellTimes() {
+      const now = networkNow();
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = now.getSeconds();
+      const currentTime = `${hh}:${mm}`;
+      if (ss === 0 && bellTimes.includes(currentTime) && currentTime !== lastPlayedTime) {
+        playBellSound();
+        lastPlayedTime = currentTime;
+      }
+    }
+
+    function updateBackground() {
+      const now = networkNow();
+      const currentMinutes = now.getHours() * 60 + now.getMinutes();
+      document.getElementById('currentTime').textContent = clockFmt.format(now);
+
+      let matched = intervals.find(i => currentMinutes >= parseTimeToMinutes(i.start) && currentMinutes < parseTimeToMinutes(i.end));
+      if (!matched) {
+        matched = { color:"#FF746C", textcolor:"#ffffff", answer:"No, the 10/10 Rule is in effect.", period:"10/10 Window" };
+      }
+
+      document.body.style.backgroundColor = matched.color;
+      document.body.style.color = matched.textcolor;
+
+      const isLight = matched.textcolor.toLowerCase() === '#ffffff' || matched.textcolor.toLowerCase() === 'white';
+      document.body.classList.toggle('light-fg', isLight);
+      document.documentElement.style.setProperty('--fg', matched.textcolor);
+
+      // Fade-in updates for period and answer (only when they change)
+      setTextWithFade(document.getElementById('period'), matched.period);
+      setTextWithFade(document.getElementById('answer'), matched.answer);
+    }
+
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) { checkBellTimes(); updateBackground(); } });
+
+    function startTicks() {
+      const now = Date.now();
+      const next = 1000 - (now % 1000);
+      setTimeout(() => {
+        checkBellTimes();
+        updateBackground();
+        setInterval(checkBellTimes, 1000);
+        setInterval(updateBackground, 1000);
+      }, next);
+    }
+    startTicks();
+    updateBackground();
+  </script>
+</body>
+</html>
